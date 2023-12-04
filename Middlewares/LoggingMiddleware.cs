@@ -11,15 +11,26 @@ public class LoggingMiddleware
     {
         _next = next;
     }
-  
+    
+    public void ConsoleLog(HttpContext context)
+    {
+        Console.WriteLine($"[{DateTime.Now}]: New request to http://{context.Request.Host.Value + context.Request.Path}");
+    }
+    public async Task FileLog(HttpContext context)
+    {
+        string logString = $"[{DateTime.Now}]: New request to http://{context.Request.Host.Value + context.Request.Path}\n";
+        string logFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "Logs.txt");
+        await File.AppendAllTextAsync(logFilePath, logString);
+    }
     /// <summary>
     ///  Необходимо реализовать метод Invoke  или InvokeAsync
     /// </summary>
     public async Task InvokeAsync(HttpContext context)
     {
-        // Для логирования данных о запросе используем свойста объекта HttpContext
-        Console.WriteLine($"[{DateTime.Now}]: New request to http://{context.Request.Host.Value + context.Request.Path}");
-      
+        
+
+        ConsoleLog(context);
+        await FileLog(context);
         // Передача запроса далее по конвейеру
         await _next.Invoke(context);
     }
