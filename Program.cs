@@ -11,7 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<BlogContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Singleton);
-builder.Services.AddTransient<IBlogRepository, BlogRepository>();
+
+builder.Services.AddSingleton<IBlogRepository, BlogRepository>();
+builder.Services.AddSingleton<IRequestRepository, RequestRepository>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -32,20 +34,11 @@ app.UseRouting();
 
 app.UseAuthorization();
 app.UseMiddleware<LoggingMiddleware>();
-var us = new User()
-{
-    Id = Guid.NewGuid(),
-    FirstName = string.Empty,
-    LastName = string.Empty,
-    JoinDate= DateTime.Now
 
-};
 
 app.MapGet("/db", (BlogContext rep) => rep.Users.ToList());
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-/*app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Users}/{action=Index}/{id?}");*/
+
 app.Run();
